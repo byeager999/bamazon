@@ -32,22 +32,74 @@ function queryAllItems() {
       console.log(res[i].item_id + " | " + res[i].product_name + " | " + "$" + res[i].price);
     }
     console.log("-----------------------------------");
+    chooseItem();
+    function chooseItem() {
+      inquirer.prompt([
+        {
+          name: "choice",
+          type: "input",
+          message: "What item id would you like to purchase?",
+          choices: function (value) {
+            var choiceArray = [];
+            return choiceArray;
+          }
+        }, 
+        {
+          name: "quantity",
+          type: "input",
+          message: "How many would you like to purchase?",
+          validate: function (value) {
+            if (isNaN(value) === false) {
+              return true;
+            }
+            return false;
+          } 
+        }]).then(function (userInput) {
+            for (var i = 0; i < res.length; i++) {
+              if (res[i].product_name === userInput.choice) {
+                var chosenItem = res[i];
+                console.log(chosenItem);
+              }
+            }
+          var updateStock = parseInt(chosenItem.stock_quantity) - parseInt(userInput.quantity);
+          var sales = parseFloat(chosenItem.product_sales).toFixed(2);
+
+          if (chosenItem.stock_quantity < parseInt(userInput.quantity)) {
+            console.log("We do not have that many " + chosenItem + "s for available for sale.");
+            repeat();
+          } else {
+            var total = (parseFloat(userInput.quantity) * chosenItem.price).toFixed(2);
+            var totalPurchase = (parseFloat(total) + parseFloat(sales)).toFixed(2);
+
+            var query = connection.query("UPDATE items SET ?, ? WHERE ?", [{ stock_quantity: updateStock }, { product_sales: totalPurchase }, { item_id: chosenItem.item_id }],
+              function (err, res) {
+                if (err) throw err;
+                console.log("Thank you for your purchase!");
+                console.log("Your total is $ " + total);
+                repeat();
+              })
+          }
+            
+      })
+    }
+
+
   });
+
 }
-// function to have the user to select which item they want to purchase
-// function chooseItem() {
-//   inquirer.prompt(
-//     {
-//       name: "choice",
-//       type: "rawlist",
-//       choices: function () {
-//         var choiceArray = [];
-//         for (var i = 0; i < results.length; i++) {
-//           choiceArray.push(results[i].item_id);
-//         } return choiceArray;
-//       },
-//       message: "What item id would you like to buy?"
-//     }
-//   )  
-// }
-// chooseItem();
+function repeat() {
+  inquirer.prompt({
+    name: "repurchase",
+    choices: ["Yes", "No"],
+    message: "Would you like to purchase another item?"
+  }).then(function (answer) {
+    if (answer.repurchase === "Yes") {
+      queryAllItems();
+    } else {
+      console.log("Thank you for shopping with Bamazon!");
+      connection.end();
+    }
+  })
+}
+
+
