@@ -43,7 +43,7 @@ function queryAllItems() {
             var choiceArray = [];
             return choiceArray;
           }
-        }, 
+        },
         {
           name: "quantity",
           type: "input",
@@ -53,53 +53,45 @@ function queryAllItems() {
               return true;
             }
             return false;
-          } 
-        }]).then(function (userInput) {
-            for (var i = 0; i < res.length; i++) {
-              if (res[i].product_name === userInput.choice) {
-                var chosenItem = res[i];
-                console.log(chosenItem);
-              }
-            }
-          var updateStock = parseInt(chosenItem.stock_quantity) - parseInt(userInput.quantity);
-          var sales = parseFloat(chosenItem.product_sales).toFixed(2);
-
-          if (chosenItem.stock_quantity < parseInt(userInput.quantity)) {
-            console.log("We do not have that many " + chosenItem + "s for available for sale.");
-            repeat();
-          } else {
-            var total = (parseFloat(userInput.quantity) * chosenItem.price).toFixed(2);
-            var totalPurchase = (parseFloat(total) + parseFloat(sales)).toFixed(2);
-
-            var query = connection.query("UPDATE items SET ?, ? WHERE ?", [{ stock_quantity: updateStock }, { product_sales: totalPurchase }, { item_id: chosenItem.item_id }],
-              function (err, res) {
-                if (err) throw err;
-                console.log("Thank you for your purchase!");
-                console.log("Your total is $ " + total);
-                repeat();
-              })
           }
-            
-      })
-    }
+        }]).then(function (answer) {
 
+          console.log('The user choice =', answer);
+          console.log('The user choice =', answer.choice);
+          console.log('The user choice =', answer.quantity);
 
-  });
+          var chosenItem = answer.choice;
+          var amountChosen = answer.quantity;
 
-}
-function repeat() {
-  inquirer.prompt({
-    name: "repurchase",
-    choices: ["Yes", "No"],
-    message: "Would you like to purchase another item?"
-  }).then(function (answer) {
-    if (answer.repurchase === "Yes") {
-      queryAllItems();
-    } else {
-      console.log("Thank you for shopping with Bamazon!");
-      connection.end();
+          if (amountChosen < results.stock_quantity) {
+            console.log("We do not have enough " + chosenItem + "'s in stock.  Please choose another amount.")
+          }
+          else {
+            console.log("Thank you for your purchase.")
+          }
+          repeat()
+        });
+
     }
   })
 }
+function repeat() {
+  inquirer.prompt({
+    // Ask user if he wants to purchase another item
+    name: "repurchase",
+    type: "list",
+    choices: ["Yes", "No"],
+    message: "Would you like to purchase another item?"
+  }).then(function (answer) {
+    if (answer.repurchase == "Yes") {
+      queryAllItems();
+    }
+    else {
+      console.log("Thanks for shopping at Bamazon!")
+      connection.end();
+    }
+  });
+}
+
 
 
