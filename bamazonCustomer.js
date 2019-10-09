@@ -26,7 +26,7 @@ console.log("Here are our available items.")
 
 // query the database for all items up for sale
 function queryAllItems() {
-  connection.query("SELECT * FROM items", function (err, res) {
+  connection.query("SELECT * FROM products", function (err, res) {
     if (err) throw err;
     for (var i = 0; i < res.length; i++) {
       console.log(res[i].item_id + " | " + res[i].product_name + " | " + "$" + res[i].price);
@@ -56,19 +56,24 @@ function queryAllItems() {
           }
         }]).then(function (answer) {
 
-          console.log('The user choice =', answer);
-          console.log('The user choice =', answer.choice);
-          console.log('The user choice =', answer.quantity);
+          // This was used to see the choices the user was making
+          // console.log('The user choice =', answer);
+          // console.log('The user choice =', answer.choice);
+          // console.log('The user choice =', answer.quantity);
 
           var chosenItem = answer.choice;
           var amountChosen = answer.quantity;
-
-          if (amountChosen < results.stock_quantity) {
-            console.log("We do not have enough " + chosenItem + "'s in stock.  Please choose another amount.")
+          // Checks if the amount of items available for purchase
+          if (amountChosen >
+            res[chosenItem].stock_quantity) {
+            console.log("We do not have enough " + res[chosenItem - 1].product_name + "'s in stock.  Please choose another amount.")
           }
+          // If enought items are available thanks the customer and gives them their total
           else {
-            console.log("Thank you for your purchase.")
+            console.log("Thank you for your purchase.  You're total is $" + amountChosen * res[chosenItem - 1].price);
           }
+
+
           repeat()
         });
 
