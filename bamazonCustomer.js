@@ -71,10 +71,25 @@ function queryAllItems() {
           // If enought items are available thanks the customer and gives them their total
           else {
             console.log("Thank you for your purchase.  You're total is $" + amountChosen * res[chosenItem - 1].price);
+            updateQuantity();
+            function updateQuantity() {
+              console.log("Updating all " + res[chosenItem - 1].product_name + " quantities...\n");
+              var newQuantity = res[4].stock_quantity - answer.quantity;
+              var query = connection.query(
+                "UPDATE products SET ? WHERE ?",
+                [
+                  // need to update the subtract the amount ordered from the stock quantity with a math equation
+                  { stock_quantity: newQuantity },
+                  { item_id: chosenItem.item_id }
+                ],
+                function (err, res) {
+                  if (err) throw err;
+                })
+            }
           }
 
 
-          repeat()
+          repeat();
         });
 
     }
@@ -97,6 +112,7 @@ function repeat() {
     }
   });
 }
+
 
 
 
