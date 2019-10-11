@@ -5,7 +5,7 @@ var inquirer = require("inquirer");
 var connection = mysql.createConnection({
   host: "localhost",
 
-  // Your port; if not 3306
+  // Port to the server
   port: 3306,
 
   // Your username
@@ -19,7 +19,7 @@ var connection = mysql.createConnection({
 // connect to the mysql server and sql database
 connection.connect(function (err) {
   if (err) throw err;
-  // run the start function after the connection is made to prompt the user
+  // pulls the items for the user to select from
   queryAllItems();
 });
 console.log("Here are our available items.")
@@ -33,6 +33,7 @@ function queryAllItems() {
     }
     console.log("-----------------------------------");
     chooseItem();
+    // function to allow the user to choose an item and the amount of how many they want to purchase
     function chooseItem() {
       inquirer.prompt([
         {
@@ -82,13 +83,12 @@ function queryAllItems() {
     }
   })
 }
+// function to update the item's quantity in the db
 function updateQuantity(item, amountChosen) {
-  console.log("Updating all " + item.product_name + " quantities...\n");
   var newQuantity = item.stock_quantity - amountChosen;
   var query = connection.query(
     "UPDATE products SET ? WHERE ?",
     [
-      // need to update the subtract the amount ordered from the stock quantity with a math equation
       { stock_quantity: newQuantity },
       { item_id: item.item_id }
     ],
